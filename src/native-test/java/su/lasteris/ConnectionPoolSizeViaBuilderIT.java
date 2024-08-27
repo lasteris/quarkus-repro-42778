@@ -3,6 +3,6 @@ package su.lasteris;
 import io.quarkus.test.junit.QuarkusIntegrationTest;
 
 @QuarkusIntegrationTest
-class GreetingResourceIT extends GreetingResourceTest {
+class ConnectionPoolSizeViaBuilderIT extends ConnectionPoolSizeViaBuilderTest {
     // Execute the same tests but in packaged mode.
 }

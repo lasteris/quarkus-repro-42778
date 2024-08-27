@@ -1,74 +1,32 @@
-# quarkus-repro-42778
+## Description
+This project is reproducing issue https://github.com/quarkusio/quarkus/issues/42778
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+## Structure
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+### OmsResource
+This resource contains 2 endpoints:
+- api/slow1000
 
-## Running the application in dev mode
 
-You can run your application in dev mode that enables live coding using:
+    imitates slow work (respond after 1000ms
 
-```shell script
-./gradlew quarkusDev
+- api/slow
+
+    
+    calls slow1000 via preconfigured rest-client. Look into resources/application.properties. 
+    Client configured with connectTimeout 500ms and connectionPoolSize 150.
+    But it works like connectTimeout 500ms and connectionPoolSize still equals to 5.
+    I've set connectTimeout=500ms to prove, that if 6+call has not enough time (less 1s in case of 1000ms endpoint response time),
+    so, it just failes, despite  connectionPoolSize > 5.   
+
+Please run quarkusDev
+and exec:
 ```
-
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
-
-## Packaging and running the application
-
-The application can be packaged using:
-
-```shell script
-./gradlew build
+curl --location --request PATCH 'http://127.0.0.1:8080/reproducer/42778/api/slow'
 ```
+Look into logs, you will see IllegalStateException sourced by only one of 6 Threads.
 
-It produces the `quarkus-run.jar` file in the `build/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `build/quarkus-app/lib/` directory.
+### ConnectionPoolSizeViaBuilderTest
 
-The application is now runnable using `java -jar build/quarkus-app/quarkus-run.jar`.
+This test suite proves, that none of methods lets set connectionPoolSize properly.
 
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./gradlew build -Dquarkus.package.jar.type=uber-jar
-```
-
-The application, packaged as an _über-jar_, is now runnable using `java -jar build/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./gradlew build -Dquarkus.native.enabled=true
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./gradlew build -Dquarkus.native.enabled=true -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./build/quarkus-repro-42778-1.0.0.0-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/gradle-tooling>.
-
-## Related Guides
-
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-- REST Client ([guide](https://quarkus.io/guides/rest-client)): Call REST services
-- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-
-## Provided Code
-
-### REST Client
-
-Invoke different services through REST with JSON
-
-[Related guide section...](https://quarkus.io/guides/rest-client)
-
-### REST
-
-Easily start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
